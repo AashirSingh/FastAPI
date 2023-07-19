@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Movie Recommendation</title>
+</head>
+<body>
+    <h1>Movie Recommendation</h1>
+    <form id="movies-form">
+        <label for="IMDB_Rating">IMDB Rating:</label><br>
+        <input type="number" step="0.1" id="IMDB_Rating" name="IMDB_Rating" min="0" max="10"><br>
+        <label for="Biography">Biography:</label><br>
+        <input type="number" id="Biography" name="Biography" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="Drama">Drama:</label><br>
+        <input type="number" id="Drama" name="Drama" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="Thriller">Thriller:</label><br>
+        <input type="number" id="Thriller" name="Thriller" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="Comedy">Comedy:</label><br>
+        <input type="number" id="Comedy" name="Comedy" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="Crime">Crime:</label><br>
+        <input type="number" id="Crime" name="Crime" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="Mystery">Mystery:</label><br>
+        <input type="number" id="Mystery" name="Mystery" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <label for="History">History:</label><br>
+        <input type="number" id="History" name="History" pattern="[0-1]{1}" title="Only 0 or 1 is allowed for genre"><br>
+        <input type="submit" value="Get Recommendations">
+    </form>
+    <div id="result"></div>
+    <div id="error-message" style="color: red;"></div> 
+
+    <script>
+    document.getElementById('movies-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const data = {
+            IMDB_Rating: document.getElementById('IMDB_Rating').value,
+            Biography: document.getElementById('Biography').value,
+            Drama: document.getElementById('Drama').value,
+            Thriller: document.getElementById('Thriller').value,
+            Comedy: document.getElementById('Comedy').value,
+            Crime: document.getElementById('Crime').value,
+            Mystery: document.getElementById('Mystery').value,
+            History: document.getElementById('History').value
+        };
+
+        for (let key in data) {
+            if (key !== 'IMDB_Rating' && parseInt(data[key]) !== 0 && parseInt(data[key]) !== 1) {
+                document.getElementById('error-message').innerText = "Only 0 or 1 is allowed for genre";
+                return;
+            }
+        }
+        console.log(JSON.stringify(data));
+
+        fetch('http://127.0.0.1:8000/movies_prediction', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            let resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h2>Recommended movies:</h2><ul>';
+
+            for(let movie of data["Movies similar to input"]) {
+                resultDiv.innerHTML += '<li>' + movie + '</li>';
+            }
+
+            resultDiv.innerHTML += '</ul>';
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    </script>
+</body>
+</html>
