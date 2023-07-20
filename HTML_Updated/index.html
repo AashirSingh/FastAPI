@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Movie JSON Populator</h2>
+
+<form id="movieForm">
+  IMDB Rating: <input type="number" id="rating" name="rating" step="0.1"><br>
+  Bio: <input type="checkbox" id="bio" name="bio"><br>
+  Drama: <input type="checkbox" id="drama" name="drama"><br>
+  Thriller: <input type="checkbox" id="thriller" name="thriller"><br>
+  Comedy: <input type="checkbox" id="comedy" name="comedy"><br>
+  Crime: <input type="checkbox" id="crime" name="crime"><br>
+  Mystery: <input type="checkbox" id="mystery" name="mystery"><br>
+  History: <input type="checkbox" id="history" name="history"><br>
+  <input type="submit" value="Submit">
+</form>
+
+<p id="result"></p>
+
+<script>
+document.getElementById('movieForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  var movie = {
+    imdb_rating: parseFloat(document.getElementById('rating').value),
+    genres: {
+      bio: document.getElementById('bio').checked,
+      drama: document.getElementById('drama').checked,
+      thriller: document.getElementById('thriller').checked,
+      comedy: document.getElementById('comedy').checked,
+      crime: document.getElementById('crime').checked,
+      mystery: document.getElementById('mystery').checked,
+      history: document.getElementById('history').checked,
+    }
+  };
+
+  var movie_detail_json = JSON.stringify({ movie: movie }, null, 2);
+
+  // Send a POST request to your FastAPI server
+  fetch('http://120.10.10.7:8000/movies_prediction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: movie_detail_json
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Display the prediction in the "result" paragraph
+    document.getElementById('result').textContent = 'Prediction: ' + data.prediction;
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+});
+</script>
+
+</body>
+</html>
