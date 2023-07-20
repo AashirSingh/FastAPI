@@ -15,8 +15,16 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pickle
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://127.0.0.1:8000/movies_prediction"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["http://127.0.0.1:8000/movies_prediction"],  # Allows all methods
+    allow_headers=["http://127.0.0.1:8000/movies_prediction"],  # Allows all headers
+)
 
 class model_input(BaseModel):
     IMDB_Rating: float
@@ -35,9 +43,9 @@ df = pd.read_csv("https://github.com/ArinB/MSBA-CA-Data/raw/main/CA05/movies_rec
 
 
 @app.post("/movies_prediction")
-def movies_pred(input_parameters : model_input):
+def movies_pred(input_data):
     
-    input_data = input_parameters.json()
+    #input_data = input_parameters.json()
     input_dictionary = json.loads(input_data)
     
     imdb = input_dictionary["IMDB_Rating"]
@@ -50,14 +58,17 @@ def movies_pred(input_parameters : model_input):
     his = input_dictionary["History"]
     
     input_list = [imdb, bio, dra, thr, com, cri, mys, his]
-
     distances, indices = movies_model.kneighbors([input_list])
-    
+    print("ml_api line 54: " ,input_list)
+    print(input_dictionary)
+
     movies = []
     for index in indices[0]:
         movies.append(df.iloc[index]["Movie Name"])
         
-    return {"Movies similar to input": movies}
+    return {"Movie Recommendations": movies}
+
+movies_pred(model_input)
         
     
     
